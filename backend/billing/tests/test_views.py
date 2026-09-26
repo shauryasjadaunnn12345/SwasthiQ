@@ -11,6 +11,15 @@ def load_sample_text(name):
 
 
 class ApiEndpointTests(TestCase):
+    def test_root_health_endpoint(self):
+        resp = self.client.get("/")
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {"status": "ok", "service": "swasthiq-billing-api"},
+        )
+
     def test_ingest_then_fetch_reconciliation_and_analytics(self):
         body = load_sample_text("billing_log_2026-07-27.json")
         resp = self.client.post(
