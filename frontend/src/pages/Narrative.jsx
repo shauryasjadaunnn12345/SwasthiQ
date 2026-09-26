@@ -40,8 +40,8 @@ export default function Narrative() {
         <>
           {result.source === "fallback_template" && (
             <div className="banner banner-warn">
-              The model's response couldn't be verified against the report, so a
-              template-generated summary is shown instead ({result.rejection_reason}).
+              AI narrative is temporarily unavailable. This verified template
+              summary uses the deterministic report.
             </div>
           )}
           <div className="two-col narrative-layout">
