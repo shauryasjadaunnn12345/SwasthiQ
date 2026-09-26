@@ -163,9 +163,15 @@ class NarrativeGenerationTests(SimpleTestCase):
         self.assertEqual(result["source"], "fallback_template")
 
     def test_fallback_narrative_never_contains_untraced_numbers(self):
-        figures = build_figures(RECONCILIATION, ANALYTICS)
+        zero_refund_reconciliation = {
+            **RECONCILIATION,
+            "total_refunds_paise": 0,
+            "refund_count": 0,
+        }
+        figures = build_figures(zero_refund_reconciliation, ANALYTICS)
         from billing.services.narrative import _fallback_narrative, _validate_llm_response
 
         result = _fallback_narrative(figures)
         ok, reason = _validate_llm_response(result, figures)
         self.assertTrue(ok, reason)
+        self.assertNotIn("refund_count", [item["field"] for item in result["traced_figures"]])

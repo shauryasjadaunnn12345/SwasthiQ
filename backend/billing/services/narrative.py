@@ -180,10 +180,22 @@ def _fallback_narrative(figures):
         )
     lines.append("Note: profit isn't shown -- cost price isn't part of this data.")
     narrative = "\n".join(lines)
+    traced_fields = ["total_billed", "visit_count", "total_collected"]
+    if "collected_pct" in figures:
+        traced_fields.append("collected_pct")
+    if figures["outstanding"]["display"] != "₹0":
+        traced_fields.extend(("outstanding", "outstanding_visit_count"))
+    if figures["refunds"]["display"] != "₹0":
+        traced_fields.extend(("refunds", "refund_count"))
+    if "peak_hour_label" in figures:
+        traced_fields.extend(("peak_hour_label", "peak_hour_revenue"))
+    if "top_qty_drug_name" in figures:
+        traced_fields.extend(("top_qty_drug_name", "top_qty_drug_qty"))
+    if "top_revenue_drug_name" in figures:
+        traced_fields.extend(("top_revenue_drug_name", "top_revenue_drug_revenue"))
     traced = [
-        {"text": fig["display"], "field": key}
-        for key, fig in figures.items()
-        if fig["display"] in narrative
+        {"text": figures[key]["display"], "field": key}
+        for key in traced_fields
     ]
     return {"narrative": narrative, "traced_figures": traced, "source": "fallback_template"}
 
