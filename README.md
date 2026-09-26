@@ -47,7 +47,43 @@ In PowerShell, set the key in the same terminal before starting the server:
 $env:MISTRAL_API_KEY = "your-key"
 ```
 
-Run the test suite (33 tests — validation, ingestion, reconciliation,
+### Use PostgreSQL on Render
+
+To use Render's managed PostgreSQL database, create a database in the same
+Render region as the backend web service. In the web service's Environment
+settings, add `DATABASE_URL` using the database's **Internal Database URL**.
+The backend selects PostgreSQL when `DATABASE_URL` is set; otherwise it uses
+SQLite locally.
+
+Set the web service start command to run migrations before Gunicorn starts:
+
+```text
+python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+```
+
+After the first deployment, ingest the sample logs again because a new
+PostgreSQL database starts empty. PostgreSQL is outside the assignment's
+stated SQLite/in-memory storage constraint, so use it only if the evaluator
+allows this deployment change.
+
+### Persist SQLite data on Render
+
+Render's service filesystem is ephemeral unless a persistent disk is attached.
+Persistent disks are available for paid web services and support one service
+instance. To keep the SQLite database across restarts and deploys:
+
+1. Open the backend web service in Render and add a persistent disk with mount
+  path `/var/data`.
+2. Add the environment variable `DJANGO_SQLITE_PATH` with value
+  `/var/data/db.sqlite3`.
+3. Save the disk and environment settings, then wait for the service to redeploy.
+4. Re-ingest the sample logs if needed. A newly attached disk starts empty; it
+  does not copy a database from the old ephemeral filesystem.
+
+Locally, if `DJANGO_SQLITE_PATH` is unset, SQLite continues to use
+`backend/db.sqlite3`.
+
+Run the test suite (41 tests — validation, ingestion, reconciliation,
 analytics, narrative grounding, and the HTTP endpoints):
 
 ```bash
